@@ -1,3 +1,15 @@
+# Quick Fix for API Error
+
+If you already have the project and are getting the error:
+"response_format: Extra inputs are not permitted"
+
+## The Problem
+The `json_schema` response_format feature isn't available in the stable API yet.
+
+## The Solution
+Replace the entire file `app/api/generate-plan/route.ts` with this code:
+
+```typescript
 // app/api/generate-plan/route.ts
 
 import { NextResponse } from 'next/server';
@@ -24,7 +36,7 @@ export async function POST(request: Request) {
 
     // Build the prompt
     const prompt = buildBusinessPlanPrompt(responses);
-
+    
     // Get the JSON schema
     const schema = getBusinessPlanSchema();
 
@@ -93,3 +105,19 @@ Return the JSON now:`;
     );
   }
 }
+```
+
+## What Changed?
+- Removed the `response_format` parameter (not yet available)
+- Added JSON schema to the prompt instead
+- Added markdown cleanup (removes ```json blocks if present)
+- Added better error handling for JSON parsing
+
+## Test It
+After replacing the file:
+1. Stop your dev server (Ctrl+C)
+2. Run `npm run dev` again
+3. Try generating a business plan
+
+It should work now! 🎉
+```

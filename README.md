@@ -1,11 +1,11 @@
 # AI Business Plan Generator
 
-A Next.js application that generates comprehensive business plans using Claude's structured output API. Users answer a questionnaire covering company information and SWOT analysis, and Claude generates a detailed, actionable business plan in JSON format.
+A Next.js application that generates comprehensive business plans using Claude AI with structured JSON output. Users answer a questionnaire covering company information and SWOT analysis, and Claude generates a detailed, actionable business plan in a consistent JSON format.
 
 ## Features
 
 - **Structured Questionnaire**: Collects company information, goals, and SWOT analysis
-- **Guaranteed JSON Structure**: Uses Claude's `json_schema` feature for reliable, typed output
+- **Reliable JSON Structure**: Uses prompt engineering with schema to get consistent, typed output
 - **Comprehensive Business Plans**: Generates:
   - Executive Summary
   - Strategic Priorities (with SWOT alignment)
@@ -93,7 +93,7 @@ The user fills out a form with:
 
 ### 2. Structured Output Generation
 
-The app sends this data to Claude with a **strict JSON schema** that defines the exact structure of the business plan:
+The app sends this data to Claude with the **JSON schema embedded in the prompt**, instructing Claude to return valid JSON that matches the schema exactly:
 
 ```typescript
 {
@@ -112,10 +112,10 @@ The app sends this data to Claude with a **strict JSON schema** that defines the
 }
 ```
 
-### 3. Guaranteed Valid Output
+### 3. Reliable Valid Output
 
-Claude's `json_schema` feature ensures:
-- ✅ Valid JSON (no parsing errors)
+The prompt-based approach with error handling ensures:
+- ✅ Valid JSON (parsing with cleanup of markdown)
 - ✅ All required fields present
 - ✅ Correct types (strings, arrays, enums)
 - ✅ Type-safe on the frontend
@@ -129,24 +129,23 @@ The structured data is rendered in a clean, organized format with sections for p
 ### API Route (`app/api/generate-plan/route.ts`)
 
 ```typescript
+// Build prompt with explicit JSON schema instructions
+const fullPrompt = `${prompt}
+
+CRITICAL: You must respond with ONLY a valid JSON object following this exact schema...`;
+
 const response = await anthropic.messages.create({
   model: 'claude-sonnet-4-20250514',
   max_tokens: 8000,
-  messages: [{ role: 'user', content: prompt }],
-  response_format: {
-    type: 'json_schema',
-    json_schema: {
-      name: 'business_plan',
-      strict: true,
-      schema: getBusinessPlanSchema()
-    }
-  }
+  messages: [{ role: 'user', content: fullPrompt }]
 });
 
-const businessPlan: BusinessPlan = JSON.parse(response.content[0].text);
+// Parse JSON (with markdown cleanup)
+let jsonText = response.content[0].text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+const businessPlan: BusinessPlan = JSON.parse(jsonText);
 ```
 
-The `strict: true` flag ensures Claude adheres exactly to the schema.
+This uses **prompt-based structured output** - we provide the schema in the prompt and Claude returns valid JSON.
 
 ### Schema Definition (`lib/schema.ts`)
 

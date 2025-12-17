@@ -9,3 +9,21 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Hide Clerk's internal sign-up/sign-in links to force use of custom pages */
+.cl-footerActionLink {
+  display: none !important;
+}
+
+.cl-footer__links {
+  display: none !important;
+}
+
+/* Hides ALL possible Clerk internal links */
+.cl-footerActionLink,
+.cl-footer__links,
+.cl-footerAction,
+.cl-footerPages,
+.cl-footer {
+  display: none !important;
+}

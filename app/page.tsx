@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import { BusinessPlan, QuestionnaireResponses } from '@/types/businessPlan';
 
 export default function Home() {
@@ -58,7 +59,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -199,13 +200,27 @@ export default function Home() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? 'Generating Business Plan...' : 'Generate Business Plan'}
-            </button>
+            {/* Protected Generate Button */}
+            <SignedIn>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? 'Generating Business Plan...' : 'Generate Business Plan'}
+              </button>
+            </SignedIn>
+
+            <SignedOut>
+              <SignInButton mode="redirect" forceRedirectUrl="/">
+                <button
+                  type="button"
+                  className="w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+                >
+                  Sign In to Generate Business Plan
+                </button>
+              </SignInButton>
+            </SignedOut>
           </form>
 
           {error && (
